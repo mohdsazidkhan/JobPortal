@@ -1,5 +1,5 @@
+const multer = require('multer');
 const express = require("express");
-const multer = require("multer");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 const { promisify } = require("util");
@@ -8,11 +8,13 @@ const pipeline = promisify(require("stream").pipeline);
 
 const router = express.Router();
 
-const upload = multer();
+
+const upload = multer({ dest: './public/' })
 
 router.post("/resume", upload.single("file"), (req, res) => {
   const { file } = req;
-  if(file.detectedFileExtension === ".pdf"){
+  console.log(file," file")
+  if(file){
     const filename = `${uuidv4()}${file.detectedFileExtension}`;
     pipeline(
       file.stream,
@@ -31,14 +33,15 @@ router.post("/resume", upload.single("file"), (req, res) => {
     });
   }else{
     res.status(400).json({
-      message: "Please upload PDF File Only",
+      message: "Please upload a File",
     });
   }
 });
 
 router.post("/profile", upload.single("file"), (req, res) => {
+  console.log(req," req")
   const { file } = req;
-  if(file.detectedFileExtension === ".png" || file.detectedFileExtension === ".jpg" || file.detectedFileExtension === ".png"){
+  if(file){
 
     const filename = `${uuidv4()}${file.detectedFileExtension}`;
 
@@ -59,7 +62,7 @@ router.post("/profile", upload.single("file"), (req, res) => {
     });
   }else{
     res.status(400).json({
-      message: "Please upload JPG, JPEG & PNG File Only",
+      message: "Please upload a Photo",
     });
   }
 });

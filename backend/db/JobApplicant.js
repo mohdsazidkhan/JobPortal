@@ -10,9 +10,17 @@ let schema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    role: {
+      type: String,
+      required: true,
+    },
     education: [
       {
         institutionName: {
+          type: String,
+          required: true,
+        },
+        courseName: {
           type: String,
           required: true,
         },

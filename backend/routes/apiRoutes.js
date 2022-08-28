@@ -15,7 +15,7 @@ const router = express.Router();
 router.post("/jobs", jwtAuth, (req, res) => {
   const user = req.user;
 
-  if (user.type != "recruiter") {
+  if (user.role != "recruiter") {
     res.status(401).json({
       message: "You don't have permissions to add jobs",
     });
@@ -60,7 +60,7 @@ router.get("/jobs", jwtAuth, (req, res) => {
   // const skip = page - 1 >= 0 ? (page - 1) * limit : 0;
 
   // to list down jobs posted by a particular recruiter
-  if (user.type === "recruiter" && req.query.myjobs) {
+  if (user.role === "recruiter" && req.query.myjobs) {
     findParams = {
       ...findParams,
       userId: user._id,
@@ -240,7 +240,7 @@ router.get("/jobs/:id", jwtAuth, (req, res) => {
 // to update info of a particular job
 router.put("/jobs/:id", jwtAuth, (req, res) => {
   const user = req.user;
-  if (user.type != "recruiter") {
+  if (user.role != "recruiter") {
     res.status(401).json({
       message: "You don't have permissions to change the job details",
     });
@@ -286,7 +286,7 @@ router.put("/jobs/:id", jwtAuth, (req, res) => {
 // to delete a job
 router.delete("/jobs/:id", jwtAuth, (req, res) => {
   const user = req.user;
-  if (user.type != "recruiter") {
+  if (user.role != "recruiter") {
     res.status(401).json({
       message: "You don't have permissions to delete the job",
     });
@@ -315,7 +315,7 @@ router.delete("/jobs/:id", jwtAuth, (req, res) => {
 // get user's personal details
 router.get("/user", jwtAuth, (req, res) => {
   const user = req.user;
-  if (user.type === "recruiter") {
+  if (user.role === "recruiter") {
     Recruiter.findOne({ userId: user._id })
       .then((recruiter) => {
         if (recruiter == null) {
@@ -357,7 +357,7 @@ router.get("/user/:id", jwtAuth, (req, res) => {
         return;
       }
 
-      if (userData.type === "recruiter") {
+      if (userData.role === "recruiter") {
         Recruiter.findOne({ userId: userData._id })
           .then((recruiter) => {
             if (recruiter === null) {
@@ -396,7 +396,7 @@ router.get("/user/:id", jwtAuth, (req, res) => {
 router.put("/user", jwtAuth, (req, res) => {
   const user = req.user;
   const data = req.body;
-  if (user.type == "recruiter") {
+  if (user.role == "recruiter") {
     Recruiter.findOne({ userId: user._id })
       .then((recruiter) => {
         if (recruiter == null) {
@@ -473,7 +473,7 @@ router.put("/user", jwtAuth, (req, res) => {
 // apply for a job [todo: test: done]
 router.post("/jobs/:id/applications", jwtAuth, (req, res) => {
   const user = req.user;
-  if (user.type != "applicant") {
+  if (user.role != "applicant") {
     res.status(401).json({
       message: "You don't have permissions to apply for a job",
     });
@@ -589,7 +589,7 @@ router.post("/jobs/:id/applications", jwtAuth, (req, res) => {
 // recruiter gets applications for a particular job [pagination] [todo: test: done]
 router.get("/jobs/:id/applications", jwtAuth, (req, res) => {
   const user = req.user;
-  if (user.type != "recruiter") {
+  if (user.role != "recruiter") {
     res.status(401).json({
       message: "You don't have permissions to view job applications",
     });
@@ -666,7 +666,7 @@ router.get("/applications", jwtAuth, (req, res) => {
     { $unwind: "$recruiter" },
     {
       $match: {
-        [user.type === "recruiter" ? "recruiterId" : "userId"]: user._id,
+        [user.role === "recruiter" ? "recruiterId" : "userId"]: user._id,
       },
     },
     {
@@ -697,7 +697,7 @@ router.put("/applications/:id", jwtAuth, (req, res) => {
   // "cancelled", // an application is cancelled by its author or when other application is accepted
   // "finished", // when job is over
 
-  if (user.type === "recruiter") {
+  if (user.role === "recruiter") {
     if (status === "accepted") {
       // get job id from application
       // get job info for maxPositions count
@@ -879,7 +879,7 @@ router.put("/applications/:id", jwtAuth, (req, res) => {
 // get a list of final applicants for all his jobs : recuiter
 router.get("/applicants", jwtAuth, (req, res) => {
   const user = req.user;
-  if (user.type === "recruiter") {
+  if (user.role === "recruiter") {
     let findParams = {
       recruiterId: user._id,
     };
@@ -985,7 +985,7 @@ router.get("/applicants", jwtAuth, (req, res) => {
 router.put("/rating", jwtAuth, (req, res) => {
   const user = req.user;
   const data = req.body;
-  if (user.type === "recruiter") {
+  if (user.role === "recruiter") {
     // can rate applicant
     Rating.findOne({
       senderId: user._id,
@@ -1330,7 +1330,7 @@ router.get("/rating", jwtAuth, (req, res) => {
   Rating.findOne({
     senderId: user._id,
     receiverId: req.query.id,
-    category: user.type === "recruiter" ? "applicant" : "job",
+    category: user.role === "recruiter" ? "applicant" : "job",
   }).then((rating) => {
     if (rating === null) {
       res.json({

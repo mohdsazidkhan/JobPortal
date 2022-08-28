@@ -16,7 +16,7 @@ import JobApplications from "./component/recruiter/JobApplications";
 import AcceptedApplicants from "./component/recruiter/AcceptedApplicants";
 import RecruiterProfile from "./component/recruiter/Profile";
 import MessagePopup from "./lib/MessagePopup";
-import isAuth, { userType } from "./lib/isAuth";
+import { userType } from "./lib/isAuth";
 
 const useStyles = makeStyles((theme) => ({
   body: {
@@ -24,8 +24,6 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    minHeight: "98vh",
-    paddingTop: "64px",
     boxSizing: "border-box",
     width: "100%",
   },

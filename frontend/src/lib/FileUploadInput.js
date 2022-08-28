@@ -43,7 +43,7 @@ const FileUploadInput = (props) => {
         setPopup({
           open: true,
           severity: "error",
-          message: err.response.statusText,
+          message: err.response,
           //   message: err.response.data
           //     ? err.response.data.message
           //     : err.response.statusText,

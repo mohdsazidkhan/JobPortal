@@ -14,7 +14,7 @@ let schema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    type: {
+    role: {
       type: String,
       enum: ["recruiter", "applicant"],
       required: true,

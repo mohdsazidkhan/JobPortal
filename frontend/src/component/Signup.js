@@ -7,7 +7,6 @@ import {
   makeStyles,
   Paper,
   MenuItem,
-  Input,
 } from "@material-ui/core";
 import axios from "axios";
 import { Redirect } from "react-router-dom";
@@ -24,20 +23,22 @@ import { SetPopupContext } from "../App";
 
 import apiList from "../lib/apiList";
 import isAuth from "../lib/isAuth";
+import jobRoles from './roles.json'
 
 const useStyles = makeStyles((theme) => ({
   body: {
-    padding: "60px 60px",
+    padding: "30px",
   },
   inputBox: {
-    width: "400px",
+    width: "300px",
   },
   submitButton: {
-    width: "400px",
+    width: "300px",
   },
 }));
 
 const MultifieldInput = (props) => {
+  
   const classes = useStyles();
   const { education, setEducation } = props;
 
@@ -63,7 +64,19 @@ const MultifieldInput = (props) => {
               variant="outlined"
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid item xs={6}>
+            <TextField
+              label={`Course Name #${key + 1}`}
+              value={education[key].courseName}
+              onChange={(event) => {
+                const newEdu = [...education];
+                newEdu[key].courseName = event.target.value;
+                setEducation(newEdu);
+              }}
+              variant="outlined"
+            />
+          </Grid>
+          <Grid item xs={6}>
             <TextField
               label="Start Year"
               value={obj.startYear}
@@ -76,7 +89,7 @@ const MultifieldInput = (props) => {
               }}
             />
           </Grid>
-          <Grid item xs={3}>
+          <Grid item xs={6}>
             <TextField
               label="End Year"
               value={obj.endYear}
@@ -100,6 +113,7 @@ const MultifieldInput = (props) => {
               ...education,
               {
                 institutionName: "",
+                courseName: "",
                 startYear: "",
                 endYear: "",
               },
@@ -115,25 +129,18 @@ const MultifieldInput = (props) => {
 };
 
 const Login = (props) => {
+
   const classes = useStyles();
+
   const setPopup = useContext(SetPopupContext);
+
+  const [workexperience, setWorkExperience] =useState("");
 
   const [loggedin, setLoggedin] = useState(isAuth());
 
-  const [signupDetails, setSignupDetails] = useState({
-    type: "applicant",
-    email: "",
-    password: "",
-    name: "",
-    education: [],
-    skills: [],
-    resume: "",
-    profile: "",
-    bio: "",
-    contactNumber: "",
-  });
-
   const [phone, setPhone] = useState("");
+
+  const [exp, setExp] = useState(false);
 
   const [education, setEducation] = useState([
     {
@@ -142,6 +149,26 @@ const Login = (props) => {
       endYear: "",
     },
   ]);
+
+  const [signupDetails, setSignupDetails] = useState({
+    role: "applicant",
+    type: "",
+    email: "",
+    password: "",
+    name: "",
+    gender: "",
+    hq: "",
+    workexp: workexperience,
+    salary: "",
+    years: "",
+    months: "",
+    education: [],
+    skills: [],
+    resume: "",
+    profile: "",
+    bio: "",
+    contactNumber: "",
+  });
 
   const [inputErrorHandler, setInputErrorHandler] = useState({
     email: {
@@ -161,14 +188,23 @@ const Login = (props) => {
       required: true,
       error: false,
       message: "",
-    },
+    }
   });
 
+  const handleWorkExp = (value) =>{
+    setWorkExperience(value);
+    console.log(value," value")
+    if(value === 'experienced'){
+      setExp(true)
+    }else{
+      setExp(false)
+    }
+  }
+
   const handleInput = (key, value) => {
-    setSignupDetails({
-      ...signupDetails,
-      [key]: value,
-    });
+    
+    setSignupDetails({...signupDetails, [key]: value,});
+
   };
 
   const handleInputError = (key, status, message) => {
@@ -223,7 +259,7 @@ const Login = (props) => {
         .post(apiList.signup, updatedDetails)
         .then((response) => {
           localStorage.setItem("token", response.data.token);
-          localStorage.setItem("type", response.data.type);
+          localStorage.setItem("role", response.data.role);
           setLoggedin(isAuth());
           setPopup({
             open: true,
@@ -293,7 +329,7 @@ const Login = (props) => {
         .post(apiList.signup, updatedDetails)
         .then((response) => {
           localStorage.setItem("token", response.data.token);
-          localStorage.setItem("type", response.data.type);
+          localStorage.setItem("role", response.data.role);
           setLoggedin(isAuth());
           setPopup({
             open: true,
@@ -336,9 +372,9 @@ const Login = (props) => {
             label="Role"
             variant="outlined"
             className={classes.inputBox}
-            value={signupDetails.type}
+            value={signupDetails.role}
             onChange={(event) => {
-              handleInput("type", event.target.value);
+              handleInput("role", event.target.value);
             }}
           >
             <MenuItem value="applicant">Applicant</MenuItem>
@@ -374,6 +410,7 @@ const Login = (props) => {
             required={true}
           />
         </Grid>
+
         <Grid item>
           <PasswordInput
             label="Password"
@@ -391,8 +428,139 @@ const Login = (props) => {
             }}
           />
         </Grid>
-        {signupDetails.type === "applicant" ? (
+        <Grid item>
+          <PhoneInput
+            country={"in"}
+            value={phone}
+            onChange={(phone) => setPhone(phone)}
+          />
+        </Grid>
+        {signupDetails.role === "applicant" ? (
           <>
+          <Grid item>
+          <TextField
+            select
+            label="Job Type"
+            variant="outlined"
+            className={classes.inputBox}
+            value={signupDetails.type}
+            onChange={(event) => {
+              handleInput("type", event.target.value);
+            }}
+          >
+            {jobRoles.jobs.map((item,index)=>{
+              return (
+                <MenuItem key={index} value={item}>{item}</MenuItem>
+              )
+            })}
+          </TextField>
+          </Grid>
+          <Grid item>
+            <TextField
+              select
+              label="Gender"
+              variant="outlined"
+              className={classes.inputBox}
+              value={signupDetails.gender}
+              onChange={(event) => {
+                handleInput("gender", event.target.value);
+              }}
+            >
+              <MenuItem value="male">Male</MenuItem>
+              <MenuItem value="female">Female</MenuItem>
+            </TextField>
+          </Grid>
+          <Grid item>
+            <TextField
+              select
+              label="Highest Qualification"
+              variant="outlined"
+              className={classes.inputBox}
+              value={signupDetails.hq}
+              onChange={(event) => {
+                handleInput("hq", event.target.value);
+              }}
+            >
+              <MenuItem value="b10">Below 10th</MenuItem>
+              <MenuItem value="10">10th Pass</MenuItem>
+              <MenuItem value="12">12th Pass</MenuItem>
+              <MenuItem value="g">Graduate</MenuItem>
+              <MenuItem value="pg">Post Graduate</MenuItem>
+              
+            </TextField>
+          </Grid>
+          <Grid item>
+            <TextField
+              select
+              label="Work Experience"
+              variant="outlined"
+              className={classes.inputBox}
+              value={workexperience}
+              onChange={(event) => {handleWorkExp(event.target.value)}}
+            >
+              <MenuItem value="fresher">Fresher</MenuItem>
+              <MenuItem value="experienced">Experienced</MenuItem>
+            </TextField>
+          </Grid>
+          {exp === true && 
+          <>
+          <Grid item>
+            <TextField
+              label="Salary"
+              value={signupDetails.salary}
+              onChange={(event) => handleInput("salary", event.target.value)}
+              className={classes.inputBox}
+              variant="outlined"
+            />
+          </Grid>
+          <Grid item>
+            <TextField
+              label="Years (5)"
+              value={signupDetails.years}
+              onChange={(event) => handleInput("years", event.target.value)}
+              className={classes.inputBox}
+              variant="outlined"
+            />
+          </Grid>
+          <Grid item>
+            <TextField
+              label="Months (10)"
+              value={signupDetails.months}
+              onChange={(event) => handleInput("months", event.target.value)}
+              className={classes.inputBox}
+              variant="outlined"
+            />
+          </Grid>
+          </>
+          }
+          <Grid item>
+            <TextField
+              select
+              label="City"
+              variant="outlined"
+              className={classes.inputBox}
+              value={signupDetails.city}
+              onChange={(event) => {
+                handleInput("city", event.target.value);
+              }}
+            >
+              <MenuItem value="delhi">Delhi</MenuItem>
+              <MenuItem value="gurgaon">Gurgaon</MenuItem>
+              <MenuItem value="mumbai">Mumbai</MenuItem>
+              <MenuItem value="hyderabad">Hyderabad</MenuItem>
+              <MenuItem value="chennai">Chennai</MenuItem>
+              <MenuItem value="banglore">Banglore</MenuItem>
+              <MenuItem value="noida">noida</MenuItem>
+              <MenuItem value="pune">Pune</MenuItem>
+              <MenuItem value="faridabad">Faridabad</MenuItem>
+              <MenuItem value="ghaziabad">Ghaziabad</MenuItem>
+              <MenuItem value="indore">Indore</MenuItem>
+              <MenuItem value="jaipur">Jaipur</MenuItem>
+              <MenuItem value="chadigarh">Chadigarh</MenuItem>
+              <MenuItem value="mohali">Mohali</MenuItem>
+              <MenuItem value="lucknow">Lucknow</MenuItem>
+            </TextField>
+          </Grid>
             <MultifieldInput
               education={education}
               setEducation={setEducation}
@@ -450,22 +618,14 @@ const Login = (props) => {
                 }}
               />
             </Grid>
-            <Grid item>
-              <PhoneInput
-                country={"in"}
-                value={phone}
-                onChange={(phone) => setPhone(phone)}
-              />
-            </Grid>
           </>
         )}
-
         <Grid item>
           <Button
             variant="contained"
             color="primary"
             onClick={() => {
-              signupDetails.type === "applicant"
+              signupDetails.role === "applicant"
                 ? handleLogin()
                 : handleLoginRecruiter();
             }}
